@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdatePetRequest extends FormRequest
+class AddPetRequest extends FormRequest
 {
     /**
      *
@@ -17,7 +17,6 @@ class UpdatePetRequest extends FormRequest
     }
 
     /**
-     *
      *
      * @return array
      */

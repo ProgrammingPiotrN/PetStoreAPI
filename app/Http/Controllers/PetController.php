@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\DTOs\CategoryDTO;
 use App\DTOs\PetDTO;
+use App\Http\Requests\AddPetRequest;
+use App\Http\Requests\UpdatePetRequest;
+use App\Http\Requests\UploadPetImageRequest;
 use App\Models\Category;
 use App\Models\Pet;
 use App\Services\PetService;
@@ -30,7 +33,7 @@ class PetController extends Controller
         return view('pets.index', compact('pets'));
     }
 
-    public function addPet(Request $request)
+    public function addPet(AddPetRequest $request)
     {
         $petDTO = new PetDTO(
             $request->id,
@@ -45,7 +48,7 @@ class PetController extends Controller
         return response()->json($pet);
     }
 
-    public function updatePet(Request $request, int $petId)
+    public function updatePet(UpdatePetRequest $request, int $petId)
     {
         $petDTO = new PetDTO(
             $request->id,
@@ -78,7 +81,7 @@ class PetController extends Controller
         return response()->json($pet);
     }
 
-    public function uploadImage(Request $request, int $petId)
+    public function uploadImage(UploadPetImageRequest $request, int $petId)
     {
         $imagePath = $request->file('image')->getPathname();
         $success = $this->petService->uploadImage($petId, $imagePath);
