@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\DTOs\CategoryDTO;
 use App\DTOs\PetDTO;
+use App\Exceptions\PetNotFoundException;
+use App\Exceptions\InvalidPetDataException;
+use App\Exceptions\ImageUploadException;
 use App\Http\Requests\AddPetRequest;
 use App\Http\Requests\UpdatePetRequest;
 use App\Http\Requests\UploadPetImageRequest;
-use App\Models\Category;
-use App\Models\Pet;
 use App\Services\PetService;
 use Illuminate\Http\Request;
 
@@ -19,18 +20,6 @@ class PetController extends Controller
     public function __construct(PetService $petService)
     {
         $this->petService = $petService;
-    }
-
-    public function index()
-    {
-        return view('layouts.welcome');
-    }
-
-    public function indexPet()
-    {
-        $pets = $this->petService->getAllPets();
-
-        return view('pets.index', compact('pets'));
     }
 
     public function addPet(AddPetRequest $request)
@@ -44,53 +33,47 @@ class PetController extends Controller
             $request->status
         );
 
-        $pet = $this->petService->addPet($petDTO);
-        return response()->json($pet);
-    }
+        try {
+            $pet = $this->petService->addPet($petDTO);
+        } catch (\Exception $e) {
+            throw new InvalidPetDataException();
+        }
 
-    public function updatePet(UpdatePetRequest $request, int $petId)
-    {
-        $petDTO = new PetDTO(
-            $request->id,
-            new CategoryDTO($request->category['id'], $request->category['name']),
-            $request->name,
-            $request->photoUrls,
-            $request->tags,
-            $request->status
-        );
-
-        $pet = $this->petService->updatePet($petId, $petDTO);
-        return response()->json($pet);
-    }
-
-    public function findByStatus(string $status)
-    {
-        $pets = $this->petService->findPetsByStatus($status);
-        return response()->json($pets);
-    }
-
-    public function findByTags(array $tags)
-    {
-        $pets = $this->petService->findPetsByTags($tags);
-        return response()->json($pets);
+        return response()->json($pet, 201);
     }
 
     public function findPetById(int $petId)
     {
         $pet = $this->petService->findPetById($petId);
-        return response()->json($pet);
+
+        if (!$pet) {
+            throw new PetNotFoundException();
+        }
+
+        return response()->json($pet, 200);
     }
 
     public function uploadImage(UploadPetImageRequest $request, int $petId)
     {
         $imagePath = $request->file('image')->getPathname();
+
         $success = $this->petService->uploadImage($petId, $imagePath);
-        return response()->json(['success' => $success]);
+
+        if (!$success) {
+            throw new ImageUploadException();
+        }
+
+        return response()->json(['success' => $success], 200);
     }
 
     public function deletePet(int $petId)
     {
         $success = $this->petService->deletePet($petId);
-        return response()->json(['success' => $success]);
+
+        if (!$success) {
+            throw new PetNotFoundException();
+        }
+
+        return response()->json(['message' => 'Zwierzę zostało usunięte'], 200);
     }
 }
