@@ -8,10 +8,8 @@ use App\Exceptions\PetNotFoundException;
 use App\Exceptions\InvalidPetDataException;
 use App\Exceptions\ImageUploadException;
 use App\Http\Requests\AddPetRequest;
-use App\Http\Requests\UpdatePetRequest;
 use App\Http\Requests\UploadPetImageRequest;
 use App\Services\PetService;
-use Illuminate\Http\Request;
 
 class PetController extends Controller
 {
@@ -20,6 +18,16 @@ class PetController extends Controller
     public function __construct(PetService $petService)
     {
         $this->petService = $petService;
+    }
+
+    public function index()
+    {
+        return view('layouts.welcome');
+    }
+    public function indexPet()
+    {
+        $pets = $this->petService->getAllPets();
+        return view('pets.index', compact('pets'));
     }
 
     public function addPet(AddPetRequest $request)
