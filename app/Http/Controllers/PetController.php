@@ -74,6 +74,6 @@ class PetController extends Controller
             throw new PetNotFoundException();
         }
 
-        return response()->json(['message' => 'Zwierzę zostało usunięte'], 200);
+        return response()->json(['message' => 'The animal was removed'], 200);
     }
 }
